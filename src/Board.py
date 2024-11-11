@@ -1,5 +1,6 @@
 from macros import *
 
+
 class Board:
     def __init__(self):
         self.board = None
@@ -8,10 +9,27 @@ class Board:
         self.setup()
 
     def print(self):
+        # Print column numbers
+        print("  ", end="")
+        for j in range(self.length):
+            print(f"{j + 1:2}", end="")
+        print(" X")
         for i in range(self.height):
+            print(f"{i + 1:2} ", end="")
             for j in range(self.length):
-                print(f"{CYAN}{self.board[i][j]}{RESET}", end=" ")
+                match self.board[i][j]:
+                    case 0:
+                        print(f"{GREY}{self.board[i][j]}{RESET} ", end="")
+                    case 1:
+                        print(f"{RED}{self.board[i][j]}{RESET} ", end="")
+                    case 2:
+                        print(f"{GREEN}{self.board[i][j]}{RESET} ", end="")
+                    case 3:
+                        print(f"{YELLOW}{self.board[i][j]}{RESET} ", end="")
+                    case 4:
+                        print(f"{BLUE}{self.board[i][j]}{RESET} ", end="")
             print()
+        print(" Y")
 
     def setup(self):
         while True:

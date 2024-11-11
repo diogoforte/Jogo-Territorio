@@ -21,8 +21,8 @@ class Players:
         while players_count > 4 or players_count < 1:
             print(f"{RED}Invalid number of Players{RESET}")
             players_count = (int(input("Define the number of players:\n\t")))
-        positions = [(0, 0), (0, length - 1), (height - 1, 0), (height - 1, length - 1)]
-        player_colors = [RED, GREEN, YELLOW, BLUE]
+        positions = [(0, 0), (height - 1, length - 1), (height - 1, 0), (0, length - 1)]
+        player_colors = [RED, BLUE, YELLOW, GREEN]
         usernames = set()
         for i in range(players_count):
             while True:
@@ -36,4 +36,4 @@ class Players:
                 usernames.add(username)
                 break
             x, y = positions[i]
-            self.players.append(Player(x, y, username, player_colors[i]))
+            self.players.append(Player(x, y, username, player_colors[i], i + 1))

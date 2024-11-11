@@ -4,6 +4,7 @@ YELLOW = "\033[33m"
 BLUE = "\033[34m"
 MAGENTA = "\033[35m"
 CYAN = "\033[36m"
+GREY = "\033[90m"
 RESET = "\033[0m"
 
 CLEAR = "\033[2J\033[H"
