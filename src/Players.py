@@ -1,6 +1,7 @@
 from Player import Player
 from macros import *
 
+
 class Players:
     def __init__(self, height, length):
         self.players = []

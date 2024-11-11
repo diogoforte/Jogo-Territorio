@@ -9,7 +9,6 @@ class Board:
         self.setup()
 
     def print(self):
-        # Print column numbers
         print("  ", end="")
         for j in range(self.length):
             print(f"{j + 1:2}", end="")

@@ -2,13 +2,16 @@ from Players import Players
 from Board import Board
 from macros import *
 
+
 def clear_screen():
     print(CLEAR)
+
 
 def board_updater(board, players):
     for player in players.get_all():
         x, y = player.get_pos()
         board.board[x][y] = player.number
+
 
 def move_check(x, y, player, board):
     if x < 0 or y < 0 or x >= board.height or y >= board.length:
@@ -28,6 +31,7 @@ def move_check(x, y, player, board):
     print(f"{RED}Non diagonal move.{RESET}")
     return False
 
+
 def game_loop(players, board):
     while True:
         for player in players.get_all():
@@ -42,6 +46,7 @@ def game_loop(players, board):
             player.move(x, y)
             clear_screen()
 
+
 def main():
     clear_screen()
     print("Welcome to the game")
@@ -49,6 +54,7 @@ def main():
     players = Players(board.height, board.length)
     board_updater(board, players)
     game_loop(players, board)
+
 
 if __name__ == "__main__":
     main()
