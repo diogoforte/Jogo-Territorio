@@ -1,5 +1,5 @@
 def create_player(x, y, username, color, number):
-    return {'x': x, 'y': y, 'username': username, 'color': color, 'number': number}
+    return {'x': x, 'y': y, 'username': username, 'color': color, 'number': number, 'score': 0}
 
 
 def move_player(player, x, y):
@@ -19,3 +19,5 @@ def update_board(board, players):
     for player in players:
         x, y = get_player_pos(player)
         board['board'][x][y] = player['number']
+
+# def check_win()
