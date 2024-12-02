@@ -27,11 +27,11 @@ def print_board(board):
                 case 1:
                     print(f"{RED}{board['board'][i][j]}{RESET} ", end="")
                 case 2:
-                    print(f"{GREEN}{board['board'][i][j]}{RESET} ", end="")
+                    print(f"{BLUE}{board['board'][i][j]}{RESET} ", end="")
                 case 3:
                     print(f"{YELLOW}{board['board'][i][j]}{RESET} ", end="")
                 case 4:
-                    print(f"{BLUE}{board['board'][i][j]}{RESET} ", end="")
+                    print(f"{GREEN}{board['board'][i][j]}{RESET} ", end="")
         print()
     print(" Y")
 
