@@ -1,5 +1,5 @@
-def create_player(x, y, username, color, number):
-    return {'x': x, 'y': y, 'username': username, 'color': color, 'number': number, 'score': 0, 'is_alive': True,
+def create_player(x, y, username, color, number, score):
+    return {'x': x, 'y': y, 'username': username, 'color': color, 'number': number, 'score': score, 'is_alive': True,
             'possible_plays': 0}
 
 
