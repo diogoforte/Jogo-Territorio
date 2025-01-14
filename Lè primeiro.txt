@@ -1,0 +1,64 @@
+Histórico de Alterações no Projeto "Território"
+Funcionalidades Adicionadas:
+Bónus Recuperável:
+
+Cada jogador começa com um bónus disponível.
+O bónus só pode ser reutilizado após o jogador conquistar dois territórios.
+Modo de Duplas:
+
+Adicionado suporte para jogar em equipas.
+Se houver 4 jogadores, eles são divididos automaticamente nas equipas "Red/Blue" e "Yellow/Green".
+Jogadores da mesma equipa compartilham a cor.
+Sistema de Gravação e Carregamento de Jogos:
+
+Nova opção no menu:
+4 - Guardar Jogo: Permite salvar o estado atual do jogo (jogadores e tabuleiro) em um arquivo game_save.json.
+5 - Carregar Jogo: Permite carregar o jogo salvo e continuar de onde parou.
+Regras do Jogo Atualizadas:
+
+Adicionada uma explicação clara sobre como o bónus funciona e como ele é recuperado.
+As regras agora aparecem no menu como uma opção independente (opção 3).
+Visualização de Pontuação:
+
+Reintroduzida como uma funcionalidade separada.
+Permite exibir a pontuação de todos os jogadores a qualquer momento.
+Menu Melhorado:
+
+Reformulado para incluir as novas opções:
+Registar Jogador.
+Iniciar Jogo.
+Visualizar Regras.
+Guardar Jogo.
+Carregar Jogo.
+Sair.
+Melhorias Gerais:
+Estado do Tabuleiro:
+
+O estado do tabuleiro é armazenado para permitir continuidade ao carregar jogos.
+Mensagens Informativas:
+
+Mensagens foram adicionadas para informar quando ações específicas não estão disponíveis (ex.: tentativa de salvar sem um jogo ativo).
+Verificação de Jogadas:
+
+Adicionado controle para validar se jogadores ainda possuem peças antes de permitir ações.
+Arquivos Afetados:
+controller.py:
+
+Adicionadas funções:
+save_game(players, board)
+load_game()
+check_bonus_reset(player)
+Ajustada a lógica do loop do jogo para integrar o sistema de bónus e gravação.
+main.py:
+
+Alterado o menu principal para incluir as novas opções.
+Integrado o sistema de gravação e carregamento.
+model.py:
+
+Adicionados novos atributos ao modelo create_player:
+used_bonus: Para controlar o estado do bónus.
+territories_conquered: Para rastrear territórios conquistados e reativar o bónus.
+view.py:
+
+Atualizado o sistema de cores para refletir as equipas.
+Adicionada exibição das equipas no início do jogo.
