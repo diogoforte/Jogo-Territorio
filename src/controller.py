@@ -231,17 +231,23 @@ def show_rules():
     print(f"{RESET}{rules}")
     input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
+def save(players):
+    with open('save.json', 'w') as json_file:
+        json.dump(players, json_file, indent=4)
+        print(f"{GREEN}Jogo salvo com sucesso!{RESET}")
+        input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
-def save_load_score(players):
-    with open('save.json', 'r+') as json_file:
-        if len(players) == 0:
+def load():
+    try:
+        with open('save.json', 'r') as json_file:
             players = json.load(json_file)
             print(f"{GREEN}Jogo carregado com sucesso!{RESET}")
             input(f"{BLUE}Pressione Enter para continuar{RESET}")
             return players
-        json.dump(players, json_file, indent=4)
-        print(f"{GREEN}Jogo salvo com sucesso!{RESET}")
+    except Exception as exception:
+        print(f"{RED}Não foi possível carregar o jogo.\n{GREEN}->{RESET}\"{exception}\"")
         input(f"{BLUE}Pressione Enter para continuar{RESET}")
+        return []
 
 
 def main():
@@ -254,8 +260,9 @@ def main():
         print(f"{GREEN}3{RESET} - Visualizar Pontuação")
         print(f"{GREEN}4{RESET} - Apagar Jogador")
         print(f"{GREEN}5{RESET} - Exibir Regras")
-        print(f"{GREEN}6{RESET} - Carregar Dados")
-        print(f"{GREEN}7{RESET} - Sair")
+        print(f"{GREEN}6{RESET} - Salvar Pontuaçoes")
+        print(f"{GREEN}7{RESET} - Carregar Pontuaçoes")
+        print(f"{GREEN}8{RESET} - Sair")
         try:
             option = int(input(f"\n{GREEN}->\t{RESET}"))
             clear_screen()
@@ -271,14 +278,15 @@ def main():
                 case 5:
                     show_rules()
                 case 6:
-                    if (players := save_load_score(players)) is None:
-                        players = []
+                        save(players)
                 case 7:
+                        players = load()
+                case 8:
                     print(f"{BLUE}Saindo do programa. Até logo!{RESET}")
                     break
                 case _:
                     print(f"{RED}Opção inválida. Tente novamente.{RESET}")
-        except ValueError as execption:
+        except Exception as exception:
             print(CLEAR)
-            print(f"{RED}Exceção encontrada.\n{GREEN}->\n{RESET}\"{execption}\"")
+            print(f"{RED}Exceção encontrada.\n{GREEN}->{RESET}\"{exception}\"")
             input(f"{BLUE}Pressione Enter para continuar{RESET}")
