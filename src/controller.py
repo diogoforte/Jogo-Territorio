@@ -1,6 +1,7 @@
 from model import *
 from view import *
 import json
+import random
 
 
 def setup_players(players, height, length):
@@ -29,21 +30,6 @@ def setup_players(players, height, length):
             create_player(x, y, selected_player["username"], player_colors[j], j + 1, selected_player["score"]))
     print(CLEAR)
     return active_players
-
-
-def possible_plays_check(board, players):
-    for player in players:
-        player['possible_plays'] = 0
-    for i in range(board['height']):
-        for j in range(board['length']):
-            if board['board'][i][j] == 0:
-                for player in players:
-                    if check_surroundings(i, j, board, player['number']):
-                        player['possible_plays'] += 1
-    for player in players:
-        if player['possible_plays'] == 1:
-            player['is_alive'] = False
-            print(f"Jogador {player['username']} eliminado")
 
 
 def check_bounds(x, y, board):
@@ -86,36 +72,39 @@ def move_check(x, y, player, board):
     return True
 
 
-def win_check(players):
-    i = 0
-    for player in players:
-        if player['is_alive']:
-            i = i + 1
-    if i == 0:
-        print(f"{RED}Empate!{RESET}")
-        return True
-    if i == 1:
-        for player in players:
-            if player['is_alive']:
-                print(
-                    f"{CLEAR}{player['color']}{player['username']}{RESET} ({player['number']}){BLUE}  venceu 🎉{RESET}")
-                player['score'] += 1
-                return True
+def possible_plays_check(board, player):
+    for i in range(board['height']):
+        for j in range(board['length']):
+            if board['board'][i][j] == player['number']:
+                if check_surroundings(i, j, board, 0):
+                    return True
     return False
+
+def check_full_board(board):
+    for i in range(board['height']):
+        for j in range(board['length']):
+            if board['board'][i][j] == 0:
+                return False
+    return True
+
+def check_pieces(players):
+    for player in players:
+        if player['pieces'] > 0:
+            return False
+    return True
 
 
 def game_loop(players, board):
     while True:
         for player in players:
-            possible_plays_check(board, players)
-            if win_check(players):  # verifica se o jogo terminou
-                print(f"{BLUE}Pontuação atual:{RESET}")
-                for p in players:
-                    print(f"{p['username']} -> {p['score']} pontos")
-                input(f"{BLUE}Pressione Enter para continuar{RESET}")
-                return
             update_board(board, players)
             print_board(board)
+            if not possible_plays_check(board, player):
+                print(
+                    f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}nao tem jogadas possiveis. Passando a vez.")
+                input(f"{BLUE}Pressione Enter para continuar{RESET}")
+                clear_screen()
+                continue
             print(f"{BLUE}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
             while True:
                 y = int(input(f"{BLUE}Movimento x:\n{GREEN}->\t{RESET}")) - 1
@@ -123,8 +112,29 @@ def game_loop(players, board):
                 if move_check(x, y, player, board):
                     break
             move_player(player, x, y)
+            player['pieces'] -= 1
+            print(f"player piece {player['pieces']}")
             clear_screen()
+        if check_full_board(board) or check_pieces(players):
+            break
 
+def win_check(players):
+    min_pieces = 22
+    winner = None
+    draw = False
+
+    for player in players:
+        if player['pieces'] < min_pieces:
+            min_pieces = player['pieces']
+            winner = player
+            draw = False
+        elif player['pieces'] == min_pieces:
+            draw = True
+    if draw:
+        print(f"{BLUE}O jogo terminou em empate!{RESET}")
+    elif winner:
+        winner['score'] = 1
+        print(f"{CLEAR}{winner['color']}{winner['username']}{RESET} ({winner['number']}){BLUE} venceu 🎉\n{RESET}")
 
 def start_game(players):
     if len(players) < 2:
@@ -144,10 +154,16 @@ def start_game(players):
         return
     update_board(board, active_players)
     game_loop(active_players, board)
+    win_check(active_players)
+    print_board(board)
+    print(f"{BLUE}Pontuação atual:{RESET}")
     for player in players:
         for active_player in active_players:
-            if player['username'] == active_player['username']:
-                player['score'] += active_player['score']
+            if player['username'] == active_player['username'] and active_player['score'] == 1:
+                player['score'] += 1
+    for player in players:
+        print(f"    {player['username']} -> {player['score']} pontos")
+    input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
 
 def username_check(username, players):
@@ -221,7 +237,7 @@ def show_rules():
 
 
 def save_load_score(players):
-    with open('save.json', '+') as json_file:
+    with open('save.json', 'r+') as json_file:
         if len(players) == 0:
             players = json.load(json_file)
             print(f"{GREEN}Jogo carregado com sucesso!{RESET}")
@@ -242,7 +258,7 @@ def main():
         print(f"{GREEN}3{RESET} - Visualizar Pontuação")
         print(f"{GREEN}4{RESET} - Apagar Jogador")
         print(f"{GREEN}5{RESET} - Exibir Regras")
-        print(f"{GREEN}6{RESET} - Salvar/Ler Pontuacoes")
+        print(f"{GREEN}6{RESET} - Carregar Dados")
         print(f"{GREEN}7{RESET} - Sair")
         try:
             option = int(input(f"\n{GREEN}->\t{RESET}"))
