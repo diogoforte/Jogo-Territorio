@@ -8,10 +8,9 @@ def setup_players(players, height, length):
     active_players = []
     while True:
         players_count = int(input(f"{BLUE}Defina o numero de jogadores:\n{GREEN}->\t{RESET}"))
-        if players_count > len(players) or players_count < 1 or players_count > 4 or len(players) < 2:
-            print(f"{RED}Numero de jogadores insuficiente{RESET}")
-            continue
-        break
+        if 1 <= players_count <= min(len(players), 4):
+            break
+        print(f"{RED}Numero de jogadores insuficiente{RESET}")
     positions = [(0, 0), (height - 1, length - 1), (height - 1, 0), (0, length - 1)]
     player_colors = [RED, BLUE, YELLOW, GREEN]
     print(f"{BLUE}Escolha os jogadores:{RESET}")
@@ -238,15 +237,26 @@ def show_rules():
     input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
 def save(players):
-    with open('save.json', 'w') as json_file:
-        json.dump(players, json_file, indent=4)
-        print(f"{GREEN}Jogo salvo com sucesso!{RESET}")
-        input(f"{BLUE}Pressione Enter para continuar{RESET}")
+    with open('save.json', 'r+') as json_file:
+        try:
+            saved_players = json.load(json_file)
+            for player in players:
+                if player not in saved_players:
+                    saved_players.append(player)
+            json_file.seek(0)
+            json_file.truncate()
+            json.dump(saved_players, json_file, indent=4)
+        except Exception:
+            json.dump(players, json_file, indent=4)
+    print(f"{GREEN}Jogo salvo com sucesso!{RESET}")
+    input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
 def load():
     try:
         with open('save.json', 'r') as json_file:
             players = json.load(json_file)
+            if not load_username_check(players):
+                raise Exception("Nome de jogador repetido")
             print(f"{GREEN}Jogo carregado com sucesso!{RESET}")
             input(f"{BLUE}Pressione Enter para continuar{RESET}")
             return players
@@ -254,6 +264,14 @@ def load():
         print(f"{RED}Não foi possível carregar o jogo.\n{GREEN}->{RESET}\"{exception}\"")
         input(f"{BLUE}Pressione Enter para continuar{RESET}")
         return []
+
+def load_username_check(players):
+    seen_usernames = set()
+    for player in players:
+        if not player['username'] or player['username'] in seen_usernames:
+            return False
+        seen_usernames.add(player['username'])
+    return True
 
 
 def main():
@@ -284,9 +302,9 @@ def main():
                 case 5:
                     show_rules()
                 case 6:
-                        save(players)
+                    save(players)
                 case 7:
-                        players = load()
+                    players = load()
                 case 8:
                     print(f"{BLUE}Saindo do programa. Até logo!{RESET}")
                     break
