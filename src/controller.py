@@ -58,17 +58,15 @@ def check_surroundings(x, y, board, number):
 def move_check(x, y, player, board):
     if not check_bounds(x, y, board):
         print(f"{RED}Movimento fora do tabuleiro.{RESET}")
-        print(f"{YELLOW}Sugestão: Consulte as regras no menu principal (Opção 5).{RESET}")
-        return False
-    if board["board"][x][y] != 0:
+    elif board["board"][x][y] != 0:
         print(f"{RED}Casa já ocupada.{RESET}")
-        print(f"{YELLOW}Sugestão: Consulte as regras no menu principal (Opção 5).{RESET}")
-        return False
-    if not check_surroundings(x, y, board, player["number"]):
+    elif not check_surroundings(x, y, board, player["number"]):
         print(f"{RED}Movimento inválido.{RESET}")
-        print(f"{YELLOW}Sugestão: Consulte as regras no menu principal (Opção 5).{RESET}")
-        return False
-    return True
+    else:
+        return True
+    print(f"{YELLOW}Sugestão: Consulte as regras no menu principal (Opção 5).{RESET}")
+    return False
+
 
 def possible_plays_check(board, player):
     for i in range(board['height']):
@@ -78,17 +76,21 @@ def possible_plays_check(board, player):
                     return True
     return False
 
+
 def check_full_board(board):
     for i in range(board['height']):
         for j in range(board['length']):
             if board['board'][i][j] == 0:
                 return False
     return True
+
+
 def check_pieces(players):
     for player in players:
         if player['pieces'] > 0:
             return False
     return True
+
 
 def game_loop(players, board):
     print_board(board)
@@ -115,27 +117,23 @@ def game_loop(players, board):
                 move_player(player, x, y)
                 player['pieces'] -= 1
                 if random.randint(0, 10) <= 5:
-                    input(f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}recebeu um bónus e ganhou uma jogada extra.{RESET}")
-                    moves =+ 1
+                    input(
+                        f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}recebeu um bónus e ganhou uma jogada extra.{RESET}")
+                    moves += 1
         if check_full_board(board) or check_pieces(players):
             break
 
+
 def win_check(players):
-    min_pieces = 22
-    winner = None
-    draw = False
-    for player in players:
-        if player['pieces'] < min_pieces:
-            min_pieces = player['pieces']
-            winner = player
-            draw = False
-        elif player['pieces'] == min_pieces:
-            draw = True
-    if draw:
+    min_pieces = min(player['pieces'] for player in players)
+    winners = [player for player in players if player['pieces'] == min_pieces]
+    if len(winners) > 1:
         print(f"{BLUE}O jogo terminou em empate!{RESET}")
-    elif winner:
+    else:
+        winner = winners[0]
         winner['score'] = 1
         print(f"{CLEAR}{winner['color']}{winner['username']}{RESET} ({winner['number']}){BLUE} venceu 🎉\n{RESET}")
+
 
 def start_game(players):
     if len(players) < 2:
@@ -203,8 +201,7 @@ def delete_player(players):
                 removed_player = players.pop(index)
                 print(f"{GREEN}Jogador {removed_player['username']} removido com sucesso.{RESET}")
                 return
-            else:
-                print(f"{RED}Número inválido. Tente novamente.{RESET}")
+            print(f"{RED}Número inválido. Tente novamente.{RESET}")
         except ValueError:
             print(f"{RED}Entrada inválida. Por favor, insira um número.{RESET}")
 
@@ -236,6 +233,7 @@ def show_rules():
     print(f"{RESET}{rules}")
     input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
+
 def save(players):
     with open('save.json', 'r+') as json_file:
         try:
@@ -251,6 +249,7 @@ def save(players):
     print(f"{GREEN}Jogo salvo com sucesso!{RESET}")
     input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
+
 def load():
     try:
         with open('save.json', 'r') as json_file:
@@ -264,6 +263,7 @@ def load():
         print(f"{RED}Não foi possível carregar o jogo.\n{GREEN}->{RESET}\"{exception}\"")
         input(f"{BLUE}Pressione Enter para continuar{RESET}")
         return []
+
 
 def load_username_check(players):
     seen_usernames = set()
