@@ -92,26 +92,32 @@ def check_pieces(players):
     return True
 
 def game_loop(players, board):
+    print_board(board)
     while True:
         for player in players:
-            update_board(board, players)
-            print_board(board)
-            if not possible_plays_check(board, player):
-                print(
-                    f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}nao tem jogadas possiveis. Passando a vez.")
-                input(f"{BLUE}Pressione Enter para continuar{RESET}")
+            moves = 1
+            while moves:
                 clear_screen()
-                continue
-            print(f"{BLUE}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
-            while True:
-                y = int(input(f"{BLUE}Movimento x:\n{GREEN}->\t{RESET}")) - 1
-                x = int(input(f"{BLUE}Movimento y:\n{GREEN}->\t{RESET}")) - 1
-                if move_check(x, y, player, board):
+                update_board(board, players)
+                print_board(board)
+                print(f"{BLUE}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
+                if not possible_plays_check(board, player):
+                    print(
+                        f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}nao tem jogadas possiveis. Passando a vez.")
+                    input(f"{BLUE}Pressione Enter para continuar{RESET}")
+                    clear_screen()
                     break
-            move_player(player, x, y)
-            player['pieces'] -= 1
-            print(f"player piece {player['pieces']}")
-            clear_screen()
+                while True:
+                    y = int(input(f"{BLUE}Movimento x:\n{GREEN}->\t{RESET}")) - 1
+                    x = int(input(f"{BLUE}Movimento y:\n{GREEN}->\t{RESET}")) - 1
+                    if move_check(x, y, player, board):
+                        break
+                moves -= 1
+                move_player(player, x, y)
+                player['pieces'] -= 1
+                if random.randint(0, 10) <= 5:
+                    input(f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}recebeu um bónus e ganhou uma jogada extra.{RESET}")
+                    moves =+ 1
         if check_full_board(board) or check_pieces(players):
             break
 

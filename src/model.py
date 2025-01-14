@@ -1,6 +1,5 @@
 def create_player(x, y, username, color, number, score):
-    return {'x': x, 'y': y, 'username': username, 'color': color, 'number': number, 'score': score, 'is_alive': True,
-            'possible_plays': 0, 'pieces': 21, 'bonus_count': 0}
+    return {'x': x, 'y': y, 'username': username, 'color': color, 'number': number, 'score': score, 'pieces': 21}
 
 
 def move_player(player, x, y):
