@@ -8,8 +8,10 @@ GREY = "\033[90m"
 RESET = "\033[0m"
 CLEAR = "\033[2J\033[H"
 
+
 def clear_screen():
     print(CLEAR)
+
 
 def print_board(board):
     print("  ", end="")
@@ -25,19 +27,14 @@ def print_board(board):
                 case 1:
                     print(f"{RED}{board['board'][i][j]}{RESET} ", end="")
                 case 2:
-                    print(f"{RED}{board['board'][i][j]}{RESET} ", end="")  # Adjust for team colors
+                    print(f"{BLUE}{board['board'][i][j]}{RESET} ", end="")
                 case 3:
                     print(f"{YELLOW}{board['board'][i][j]}{RESET} ", end="")
                 case 4:
-                    print(f"{YELLOW}{board['board'][i][j]}{RESET} ", end="")  # Adjust for team colors
+                    print(f"{GREEN}{board['board'][i][j]}{RESET} ", end="")
         print()
     print(" Y")
 
-def print_teams(players):
-    teams = {"Red/Blue": [], "Yellow/Green": []}
-    for player in players:
-        if player['team']:
-            teams[player['team']].append(player['username'])
-    print(f"{BLUE}Equipas:{RESET}")
-    for team, members in teams.items():
-        print(f"{CYAN}{team}{RESET}: {', '.join(members)}")
+
+def print_message(message):
+    print(message)

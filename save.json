@@ -1,0 +1,26 @@
+[
+    {
+        "x": 0,
+        "y": 0,
+        "username": "rafiki",
+        "color": 0,
+        "number": 0,
+        "score": 0,
+        "is_alive": true,
+        "possible_plays": 0,
+        "pieces": 2,
+        "bonus_count": 0
+    },
+    {
+        "x": 0,
+        "y": 0,
+        "username": "maumau",
+        "color": 0,
+        "number": 0,
+        "score": 0,
+        "is_alive": true,
+        "possible_plays": 0,
+        "pieces": 2,
+        "bonus_count": 0
+    }
+]

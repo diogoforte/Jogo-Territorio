@@ -71,7 +71,6 @@ def move_check(x, y, player, board):
         return False
     return True
 
-
 def possible_plays_check(board, player):
     for i in range(board['height']):
         for j in range(board['length']):
@@ -86,13 +85,11 @@ def check_full_board(board):
             if board['board'][i][j] == 0:
                 return False
     return True
-
 def check_pieces(players):
     for player in players:
         if player['pieces'] > 0:
             return False
     return True
-
 
 def game_loop(players, board):
     while True:
@@ -122,7 +119,6 @@ def win_check(players):
     min_pieces = 22
     winner = None
     draw = False
-
     for player in players:
         if player['pieces'] < min_pieces:
             min_pieces = player['pieces']
