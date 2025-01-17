@@ -8,11 +8,6 @@ GREY = "\033[90m"
 RESET = "\033[0m"
 CLEAR = "\033[2J\033[H"
 
-
-def clear_screen():
-    print(CLEAR)
-
-
 def print_board(board):
     print("  ", end="")
     for j in range(board['length']):
@@ -34,7 +29,3 @@ def print_board(board):
                     print(f"{GREEN}{board['board'][i][j]}{RESET} ", end="")
         print()
     print(" Y")
-
-
-def print_message(message):
-    print(message)

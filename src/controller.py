@@ -2,15 +2,18 @@ from model import *
 from view import *
 import json
 import random
+import os
 
 
-def setup_players(players, height, length):
+def setup_players(board, players):
     active_players = []
     while True:
         players_count = int(input(f"{BLUE}Defina o numero de jogadores:\n{GREEN}->\t{RESET}"))
         if 1 <= players_count <= min(len(players), 4):
             break
         print(f"{RED}Numero de jogadores insuficiente{RESET}")
+    height = len(board['board'])
+    length = len(board['board'][0])
     positions = [(0, 0), (height - 1, length - 1), (height - 1, 0), (0, length - 1)]
     player_colors = [RED, BLUE, YELLOW, GREEN]
     print(f"{BLUE}Escolha os jogadores:{RESET}")
@@ -20,43 +23,28 @@ def setup_players(players, height, length):
         while True:
             selected_index = int(input(f"{BLUE}Escolha o jogador {j + 1}:\n{GREEN}->\t{RESET}")) - 1
             if selected_index < 0 or selected_index >= len(players):
-                print(f"{RED}Indice invalido. Tente novamente.{RESET}")
+                print(f"{RED}Índice invalido. Tente novamente.{RESET}")
                 continue
             break
         selected_player = players[selected_index]
-        x, y = positions[j]
         active_players.append(
-            create_player(x, y, selected_player["username"], player_colors[j], j + 1, selected_player["score"]))
+            create_player(selected_player["username"], player_colors[j], j + 1, selected_player["score"]))
+        x, y = positions[j]
+        update_board(board, active_players[j], x, y)
     print(CLEAR)
+    print_board(board)
     return active_players
 
 
-def check_bounds(x, y, board):
-    return 0 <= x < board["height"] and 0 <= y < board["length"]
-
-
 def check_surroundings(x, y, board, number):
-    if check_bounds(x - 1, y - 1, board) and board["board"][x - 1][y - 1] == number:
-        return True
-    if check_bounds(x, y - 1, board) and board["board"][x][y - 1] == number:
-        return True
-    if check_bounds(x + 1, y - 1, board) and board["board"][x + 1][y - 1] == number:
-        return True
-    if check_bounds(x + 1, y + 1, board) and board["board"][x + 1][y + 1] == number:
-        return True
-    if check_bounds(x, y + 1, board) and board["board"][x][y + 1] == number:
-        return True
-    if check_bounds(x - 1, y + 1, board) and board["board"][x - 1][y + 1] == number:
-        return True
-    if check_bounds(x - 1, y, board) and board["board"][x - 1][y] == number:
-        return True
-    if check_bounds(x + 1, y, board) and board["board"][x + 1][y] == number:
-        return True
-    return False
+    return any(
+        0 <= x + dx < board["height"] and 0 <= y + dy < board["length"] and board['board'][x + dx][y + dy] == number
+        for dx in [-1, 0, 1]
+        for dy in [-1, 0, 1])
 
 
 def move_check(x, y, player, board):
-    if not check_bounds(x, y, board):
+    if not (0 <= x < board["height"] and 0 <= y < board["length"]):
         print(f"{RED}Movimento fora do tabuleiro.{RESET}")
     elif board["board"][x][y] != 0:
         print(f"{RED}Casa já ocupada.{RESET}")
@@ -77,50 +65,40 @@ def possible_plays_check(board, player):
     return False
 
 
-def check_full_board(board):
-    for i in range(board['height']):
-        for j in range(board['length']):
-            if board['board'][i][j] == 0:
-                return False
-    return True
-
-
-def check_pieces(players):
-    for player in players:
-        if player['pieces'] > 0:
-            return False
-    return True
-
-
 def game_loop(players, board):
-    print_board(board)
     while True:
         for player in players:
             moves = 1
             while moves:
-                clear_screen()
-                update_board(board, players)
+                print(CLEAR)
                 print_board(board)
-                print(f"{BLUE}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
+                print(
+                    f"{BLUE}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
                 if not possible_plays_check(board, player):
-                    print(
-                        f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}nao tem jogadas possiveis. Passando a vez.")
-                    input(f"{BLUE}Pressione Enter para continuar{RESET}")
-                    clear_screen()
+                    input(
+                        f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}nao tem jogadas possíveis. Passando a vez.\n{BLUE}Pressione Enter para continuar{RESET}")
+                    print(CLEAR)
                     break
                 while True:
-                    y = int(input(f"{BLUE}Movimento x:\n{GREEN}->\t{RESET}")) - 1
-                    x = int(input(f"{BLUE}Movimento y:\n{GREEN}->\t{RESET}")) - 1
-                    if move_check(x, y, player, board):
-                        break
+                    try:
+                        y = int(input(f"{BLUE}Movimento x:\n{GREEN}->\t{RESET}")) - 1
+                        x = int(input(f"{BLUE}Movimento y:\n{GREEN}->\t{RESET}")) - 1
+                        if move_check(x, y, player, board):
+                            break
+                    except Exception:
+                        print(f"{RED}Entrada inválida. Por favor, insira números válidos.{RESET}")
                 moves -= 1
-                move_player(player, x, y)
+                update_board(board, player, x, y)
                 player['pieces'] -= 1
                 if random.randint(0, 10) <= 5:
                     input(
                         f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) {BLUE}recebeu um bónus e ganhou uma jogada extra.{RESET}")
                     moves += 1
-        if check_full_board(board) or check_pieces(players):
+        if all(player['pieces'] == 0 for player in players):
+            print(f"sem pecas")
+            break
+        if not any(board['board'][i][j] == 0 for i in range(board['height']) for j in range(board['length'])):
+            print(f"mapa cheio")
             break
 
 
@@ -147,11 +125,10 @@ def start_game(players):
         print(f"{RED}Tamanho invalido{RESET}")
         return
     board = create_board(height, length)
-    active_players = setup_players(players, height, length)
+    active_players = setup_players(board, players)
     if not active_players:
         print(f"{RED}Numero insuficiente de jogadores registados{RESET}")
         return
-    update_board(board, active_players)
     game_loop(active_players, board)
     win_check(active_players)
     print_board(board)
@@ -180,7 +157,7 @@ def register_player(players):
     while True:
         username = input(f"{BLUE}Defina o nome do jogador:\n{GREEN}->\t{RESET}")
         if username_check(username, players):
-            players.append(create_player(0, 0, username, 0, 0, 0))
+            players.append(create_player(username, 0, 0, 0))
             break
 
 
@@ -208,11 +185,10 @@ def delete_player(players):
 
 def show_score(players):
     if not players:
-        print(CLEAR)
-        print(f"{RED}Não há jogadores registados para mostrar pontuação.{RESET}")
-        input(f"{BLUE}Pressione Enter para continuar{RESET}")
+        input(
+            f"{CLEAR}{RED}Não há jogadores registados para mostrar pontuação.\n{BLUE}Pressione Enter para continuar{RESET}")
         return
-    print(f"{BLUE}Pontuacao:{RESET}")
+    print(f"{BLUE}Pontuação:{RESET}")
     for player in players:
         print(f"{player['username']}\t{GREEN}->\t{RESET}{player['score']}{RESET}")
     input(f"{BLUE}Pressione Enter para continuar{RESET}")
@@ -230,12 +206,15 @@ def show_rules():
     7. O jogador com menos quadrados restantes vence.
     8. Existem bónus que permitem conquistar mais territórios em uma jogada.
     """
-    print(f"{RESET}{rules}")
-    input(f"{BLUE}Pressione Enter para continuar{RESET}")
+    input(f"{RESET}{rules}\n{BLUE}Pressione Enter para continuar{RESET}")
 
 
 def save(players):
-    with open('save.json', 'r+') as json_file:
+    file_path = './save.json'
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as json_file:
+            json.dump([], json_file)
+    with open(file_path, 'r+') as json_file:
         try:
             saved_players = json.load(json_file)
             for player in players:
@@ -245,23 +224,23 @@ def save(players):
             json_file.truncate()
             json.dump(saved_players, json_file, indent=4)
         except Exception:
+            json_file.seek(0)
+            json_file.truncate()
             json.dump(players, json_file, indent=4)
-    print(f"{GREEN}Jogo salvo com sucesso!{RESET}")
-    input(f"{BLUE}Pressione Enter para continuar{RESET}")
+    input(f"{GREEN}Jogo salvo com sucesso!\n{BLUE}Pressione Enter para continuar{RESET}")
 
 
 def load():
     try:
-        with open('save.json', 'r') as json_file:
+        with open('./save.json', 'r') as json_file:
             players = json.load(json_file)
             if not load_username_check(players):
                 raise Exception("Nome de jogador repetido")
-            print(f"{GREEN}Jogo carregado com sucesso!{RESET}")
-            input(f"{BLUE}Pressione Enter para continuar{RESET}")
+            input(f"{GREEN}Jogo carregado com sucesso!\n{BLUE}Pressione Enter para continuar{RESET}")
             return players
     except Exception as exception:
-        print(f"{RED}Não foi possível carregar o jogo.\n{GREEN}->{RESET}\"{exception}\"")
-        input(f"{BLUE}Pressione Enter para continuar{RESET}")
+        input(
+            f"{RED}Não foi possível carregar o jogo.\n{GREEN}->{RESET}\"{exception}\"{BLUE}Pressione Enter para continuar{RESET}")
         return []
 
 
@@ -277,19 +256,17 @@ def load_username_check(players):
 def main():
     players = []
     while True:
-        print(CLEAR)
-        print(f"{BLUE}Menu:{RESET}")
-        print(f"{GREEN}1{RESET} - Registar Jogador")
-        print(f"{GREEN}2{RESET} - Iniciar Jogo")
-        print(f"{GREEN}3{RESET} - Visualizar Pontuação")
-        print(f"{GREEN}4{RESET} - Apagar Jogador")
-        print(f"{GREEN}5{RESET} - Exibir Regras")
-        print(f"{GREEN}6{RESET} - Salvar Pontuaçoes")
-        print(f"{GREEN}7{RESET} - Carregar Pontuaçoes")
-        print(f"{GREEN}8{RESET} - Sair")
         try:
-            option = int(input(f"\n{GREEN}->\t{RESET}"))
-            clear_screen()
+            option = int(input(f"{CLEAR}{BLUE}Menu:{RESET}\n\
+    {GREEN}1{RESET} - Registar Jogador\n\
+    {GREEN}2{RESET} - Iniciar Jogo\n\
+    {GREEN}3{RESET} - Visualizar Pontuação\n\
+    {GREEN}4{RESET} - Apagar Jogador\n\
+    {GREEN}5{RESET} - Exibir Regras\n\
+    {GREEN}6{RESET} - Salvar Pontuações\n\
+    {GREEN}7{RESET} - Carregar Pontuações\n\
+    {GREEN}8{RESET} - Sair\n{GREEN}->\t{RESET}"))
+            print(CLEAR)
             match option:
                 case 1:
                     register_player(players)
@@ -311,6 +288,5 @@ def main():
                 case _:
                     print(f"{RED}Opção inválida. Tente novamente.{RESET}")
         except Exception as exception:
-            print(CLEAR)
-            print(f"{RED}Exceção encontrada.\n{GREEN}->{RESET}\"{exception}\"")
+            print(f"{CLEAR}{RED}Exceção encontrada.\n{GREEN}->{RESET}\"{exception}\"")
             input(f"{BLUE}Pressione Enter para continuar{RESET}")
