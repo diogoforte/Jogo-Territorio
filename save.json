@@ -16,5 +16,12 @@
         "number": 0,
         "score": 0,
         "pieces": 21
+    },
+    {
+        "username": "J1",
+        "color": 0,
+        "number": 0,
+        "score": 0,
+        "pieces": 20
     }
 ]
