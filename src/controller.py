@@ -1,8 +1,53 @@
-from model import *
-from view import *
 import json
 import random
 import os
+
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+BLUE = "\033[34m"
+MAGENTA = "\033[35m"
+CYAN = "\033[36m"
+GREY = "\033[90m"
+RESET = "\033[0m"
+CLEAR = "\033[2J\033[H"
+
+def print_board(board):
+    print("  ", end="")
+    for j in range(board['length']):
+        print(f"{j + 1:2}", end="")
+    print(" X")
+    for i in range(board['height']):
+        print(f"{i + 1:2} ", end="")
+        for j in range(board['length']):
+            match board['board'][i][j]:
+                case 0:
+                    print(f"{GREY}{board['board'][i][j]}{RESET} ", end="")
+                case 1:
+                    print(f"{RED}{board['board'][i][j]}{RESET} ", end="")
+                case 2:
+                    print(f"{BLUE}{board['board'][i][j]}{RESET} ", end="")
+                case 3:
+                    print(f"{YELLOW}{board['board'][i][j]}{RESET} ", end="")
+                case 4:
+                    print(f"{GREEN}{board['board'][i][j]}{RESET} ", end="")
+        print()
+    print(" Y")
+
+def create_player(username, color, number, score):
+    return {'username': username, 'color': color, 'number': number, 'score': score, 'pieces': 20}
+
+
+def move_player(player, x, y):
+    player['x'] = x
+    player['y'] = y
+
+def create_board(height, length):
+    return {'board': [[0 for _ in range(length)] for _ in range(height)], 'height': height, 'length': length}
+
+
+def update_board(board, player, x, y):
+        board['board'][x][y] = player['number']
 
 
 def add_player_to_board(board, active_players, positions, player, color, number):
@@ -111,7 +156,7 @@ def play_turn(player, board):
     while moves > 0:
         print(CLEAR)
         print_board(board)
-        print(f"{BLUE}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
+        print(f"{RESET}Turno do jogador {player['color']}{player['username']} {RESET}({player['number']})")
         while True:
             try:
                 y = int(input(f"{BLUE}Movimento x:\n{GREEN}->\t{RESET}")) - 1
@@ -124,7 +169,7 @@ def play_turn(player, board):
         player["pieces"] -= 1
         moves -= 1
         if random.randint(0, 10) <= 2:
-            print(f"{BLUE}Bónus! {player['username']} ganhou uma jogada extra!{RESET}")
+            print(f"{RESET}Bónus! {player['color']}{player['username']}{RESET} ganhou uma jogada extra!{RESET}")
             moves += 1
             input(f"{BLUE}Pressione Enter para continuar{RESET}")
 
@@ -132,8 +177,8 @@ def play_turn(player, board):
 def check_player_plays(player, board):
     if not possible_plays_check(board, player):
         input(
-            f"{BLUE}O jogador {player['color']}{player['username']} {RESET}({player['number']}) "
-            f"{BLUE}não tem jogadas possíveis. Passando a vez.\n{BLUE}Pressione Enter para continuar{RESET}"
+            f"{RESET}O jogador {player['color']}{player['username']} {RESET}({player['number']}) "
+            f"não tem jogadas possíveis. Passando a vez.\n{BLUE}Pressione Enter para continuar{RESET}"
         )
         return False
     return True
@@ -195,35 +240,36 @@ def win_check(players):
 def start_game(players, mode):
     if len(players) < 2:
         print(CLEAR)
-        print(f"{RED}Erro: É necessário pelo menos 2 jogadores registados para iniciar o jogo.{RESET}")
+        print(f"{RED}É necessário pelo menos 2 jogadores registados para iniciar o jogo.{RESET}")
         input(f"{BLUE}Pressione Enter para continuar{RESET}")
         return
     if not mode and len(players) < 4:
         print(CLEAR)
-        print(f"{RED}Erro: O modo de jogo 'Duplas' requer exatamente 4 jogadores registados.{RESET}")
+        print(f"{RED}O modo de jogo 'Duplas' requer exatamente 4 jogadores registados.{RESET}")
         input(f"{BLUE}Pressione Enter para continuar{RESET}")
         return
     try:
         height = int(input(f"{BLUE}Defina a altura do tabuleiro:\n{GREEN}->\t{RESET}"))
         length = int(input(f"{BLUE}Defina a largura do tabuleiro:\n{GREEN}->\t{RESET}"))
     except ValueError:
-        print(f"{RED}Erro: As dimensões devem ser números inteiros.{RESET}")
+        input(f"{RED}As dimensões devem ser números inteiros.{RESET}")
+
         return
-    if height < 2 or length < 2:
-        print(f"{RED}Tamanho inválido. O tabuleiro deve ter pelo menos 2x2.{RESET}")
+    if height < 2 or length < 2 or height > 10 or length > 10:
+        input(f"{RED}Tamanho inválido.\n{BLUE}Pressione Enter para continuar{RESET}")
         return
     board = create_board(height, length)
     if mode:
         active_players = setup_players(board, players)
         if not active_players:
-            print(f"{RED}Erro: Número insuficiente de jogadores ativos.{RESET}")
+            input(f"{RED}Número insuficiente de jogadores ativos.\n{BLUE}Pressione Enter para continuar{RESET}{RESET}")
             return
         game_loop(active_players, board)
         win_check(active_players)
     else:
         active_players, teams = setup_players_duplas(board, players)
         if not active_players or not teams:
-            print(f"{RED}Erro: Problema na configuração das equipas.{RESET}")
+            print(f"{RED}Problema na configuração das equipas.{RESET}")
             return
         game_loop_duplas(active_players, board, teams)
         win_check_duplas(active_players, teams)
@@ -347,53 +393,3 @@ def load_username_check(players):
             return False
         seen_usernames.add(player['username'])
     return True
-
-
-def main():
-    players = []
-    mode = True
-    while True:
-        print(CLEAR)
-        if mode:
-            print(f"{BLUE}Modo Atual: {YELLOW}1 vs 1{RESET}")
-        else:
-            print(f"{BLUE}Modo Atual: {RED}2 vs 2{RESET}")
-        print(f"{BLUE}Menu:{RESET}")
-        print(f"{GREEN}1{RESET} - Registar Jogador")
-        print(f"{GREEN}2{RESET} - Iniciar Jogo")
-        print(f"{GREEN}3{RESET} - Visualizar Pontuação")
-        print(f"{GREEN}4{RESET} - Apagar Jogador")
-        print(f"{GREEN}5{RESET} - Exibir Regras")
-        print(f"{GREEN}6{RESET} - Salvar Pontuações")
-        print(f"{GREEN}7{RESET} - Carregar Pontuações")
-        print(f"{GREEN}8{RESET} - Trocar Modo De Jogo")
-        print(f"{GREEN}9{RESET} - Sair")
-        try:
-            option = int(input(f"\n{GREEN}->\t{RESET}"))
-            print(CLEAR)
-            match option:
-                case 1:
-                    register_player(players)
-                case 2:
-                    start_game(players, mode)
-                case 3:
-                    show_score(players)
-                case 4:
-                    delete_player(players)
-                case 5:
-                    show_rules()
-                case 6:
-                    save(players)
-                case 7:
-                    players = load()
-                case 8:
-                    mode = not mode
-                case 9:
-                    print(f"{BLUE}Saindo do programa. Até logo!{RESET}")
-                    break
-                case _:
-                    print(f"{RED}Opção inválida. Tente novamente.{RESET}")
-        except Exception as exception:
-            print(CLEAR)
-            print(f"{RED}Exceção encontrada.\n{GREEN}->{RESET}\"{exception}\"")
-            input(f"{BLUE}Pressione Enter para continuar{RESET}")
